@@ -1,20 +1,38 @@
 
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import { StyleSheet,Dimensions } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
 import MapView,{Marker} from 'react-native-maps';
+import * as Location from 'expo-location';
+
 interface IGeolocation {
   latitude: number;
   longitude: number;
 }
 export default function TabOneScreen() {
   const [location, setLocation] = useState<IGeolocation>({
-    latitude:  35.56964060014485,
-    longitude: 126.8517660163343,
+    latitude:  35.5696447,
+    longitude:  126.8516797,
   });
-  
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let pos = await Location.getCurrentPositionAsync({});
+      console.log("latitude:pos.coords.latitude=>",pos.coords.latitude)
+      setLocation({latitude:pos.coords.latitude,longitude:pos.coords.longitude,});
+      console.log(location);
+    })();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Map MapView</Text>
@@ -29,25 +47,25 @@ export default function TabOneScreen() {
           longitudeDelta: 0.0421,
         }}
         onRegionChange={region => {
-          setLocation({
+          /*setLocation({
             latitude: region.latitude,
             longitude: region.longitude,
-          });
-          console.log(region.latitude,region.longitude)
+          });*/
+          //console.log(region.latitude,region.longitude)
         }}
         onRegionChangeComplete={region => {
-          setLocation({
+          /*setLocation({
             latitude: region.latitude,
             longitude: region.longitude,
-          });
+          });*/
         }}>
         <Marker
           coordinate={{
-            latitude: 35.56964060014485,
-            longitude: 126.8517660163343,
+            latitude: location.latitude,
+            longitude: location.longitude,
           }}
-          title="맥도날드, 정읍"
-          description="현재 내위치"
+          title={"latitude"+location.latitude}
+          description={"longitude"+location.longitude}
         />
       </MapView>
 
